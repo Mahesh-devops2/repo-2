@@ -1,0 +1,164 @@
+
+Ansible Master : 1 ubuntu
+
+Ansible Worker Nodes : 2 ubuntu,amazon linux
+
+node1 ansible_ssh_host=172.31.16.205
+node2 ansible_ssh_host=172.31.30.64
+
+we work with default ansible inventory file.
+
+ansible -m ping all
+
+How to work with custom inventory file.
+
+1)create our own file in any location
+2)Add group name and target machines
+3)confiure custom inventory file along with commands by using -i
+
+ansible -i /root/demo1/myhost testservers -m ping
+
+-------------------------------------------------------
+Adhoc commands and playbooks
+
+-Adhoc commands are runtime commands , never stored
+-only one time we can execute
+
+-playbooks can be stored
+-can be executed number of times
+
+-------------------------------------------------------
+play books :
+
+--package Installation ,uninstallation,service start,stop
+--Tool Installation
+
+Ansible Playbooks :
+---------------------
+
+-Ansible Playbooks are writen in yaml/yml.
+-In yaml tabs are not allowed,it allows only spaces.
+-Playbooks contain the steps which the user wants to execute on a particular machine. 
+ Playbooks are run sequentially. Playbooks are the building blocks for all the use cases of Ansible.
+-Playbook is written in YAML format with a .yml file extension.
+ One needs to be very careful with the format and alignment which makes it very sensitive
+
+
+It contains the following sections:
+
+->Every playbook starts with 3 hyphens '-'
+
+  Host section – Defines the target machines on which the playbook should run. 
+  This is based on the Ansible inventory file.
+->Variable section – This is optional and can declare all the variables needed in the playbook. 
+->Tasks section – This section lists out all the tasks that should be executed on the target machine. 
+  It specifies the use of Modules. 
+  Every task has a name which is a small description of what the task will do and will be listed while 
+  the playbook is run.
+
+
+#1 package Installation
+
+pbook1.yml
+------------
+
+---
+- hosts: node1
+  name: play1
+  become: true
+  tasks:
+    - apt: name=apache2 state=latest
+      name: Installing apache webserver
+- hosts: node2
+  name: play2
+  become: true
+  tasks:
+    - yum: name=httpd state=latest
+      name: Installing httpd webserver
+    - name: Start a httpd service
+      service: name=httpd state=started
+
+
+ansible-playbook pbook1 --syntax-check
+
+ansible-playbook pbook1
+
+
+
+pbook2.yml
+------------
+
+---
+- hosts: node1
+  name: play1
+  become: true
+  tasks:
+    - name: Stop a apache service
+      service: name=apache2 state=stopped
+- hosts: node2
+  name: play2
+  become: true
+  tasks:
+    - name: Stop a httpd service
+      service: name=httpd state=stopped
+
+
+
+pbook3.yml
+------------
+
+---
+- hosts: node1
+  name: play1
+  become: true
+  tasks:
+    - name: Start a apache service
+      service: name=apache2 state=started
+- hosts: node2
+  name: play2
+  become: true
+  tasks:
+    - name: Start a httpd service
+      service: name=httpd state=started
+
+
+
+
+pbook4.yml
+------------
+
+---
+- hosts: node1
+  become: true
+  tasks:
+    - name: Stop apache Services
+      service:
+        name: apache2
+        state: stopped
+    - apt:
+        name: apache2
+        state: absent
+      name: Uninstalling  apache2
+- hosts: node2
+  name: play2
+  become: true
+  tasks:
+    - name: Stop a httpd service
+      service: name=httpd state=stopped
+    - name: uninstall a httpd service
+      service: name=httpd state=absent
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
